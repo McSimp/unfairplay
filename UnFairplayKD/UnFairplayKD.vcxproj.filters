@@ -21,12 +21,24 @@
     <ClCompile Include="TypeMap.c">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="Util.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ProcessTracker.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DriverMain.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="TypeMap.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessTracker.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

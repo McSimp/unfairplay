@@ -1,9 +1,7 @@
 #ifndef DRIVERMAIN_H
 #define DRIVERMAIN_H
 
-#include <wdm.h>
-#include <Ntstrsafe.h>
-#define LogMessage DbgPrint
+#include <ntifs.h>
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath);
 VOID DriverUnload(PDRIVER_OBJECT pDriverObject);

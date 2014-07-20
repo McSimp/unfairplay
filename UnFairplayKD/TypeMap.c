@@ -1,9 +1,9 @@
 #include "TypeMap.h"
-#include "DriverMain.h"
+#include "Util.h"
 
 static TypeMap g_TypeMap;
 
-void TypeMap_RemoveProcess(HANDLE processID)
+void TypeMap_RemoveEntry(HANDLE processID)
 {
     INT i;
     for (i = 0; i < g_TypeMap.Count; i++)
@@ -33,7 +33,7 @@ void TypeMap_AddEntry(HANDLE processID, ProcessType type)
     }
 
     // Remove any existing entries for this process
-    TypeMap_RemoveProcess(processID);
+    TypeMap_RemoveEntry(processID);
 
     if (g_TypeMap.Count >= TYPEMAP_MAX_SIZE)
     {
@@ -127,5 +127,96 @@ void TypeMap_SetManualByType(ProcessType type, BOOLEAN manual)
         {
             current->IsManual = manual;
         }
+    }
+}
+
+DECLARE_GLOBAL_CONST_UNICODE_STRING(SourceAutoString, L"auto");
+DECLARE_GLOBAL_CONST_UNICODE_STRING(SourceManualString, L"manual");
+DECLARE_GLOBAL_CONST_UNICODE_STRING(SourceCheckString, L"dur_check");
+DECLARE_GLOBAL_CONST_UNICODE_STRING(SourceCreateProcString, L"dur_createproc");
+DECLARE_GLOBAL_CONST_UNICODE_STRING(SourceUnknownString, L"unknown");
+
+DECLARE_GLOBAL_CONST_UNICODE_STRING(ProtectedString, L"protected");
+DECLARE_GLOBAL_CONST_UNICODE_STRING(LauncherString, L"launcher");
+
+void TypeMap_LogOperation(const char* operation, HANDLE processID, ProcessType type, OperationSource source, INT deltaCount)
+{
+    DECLARE_UNICODE_STRING_SIZE(processName, 600);
+    const UNICODE_STRING* sourceString;
+    const UNICODE_STRING* typeString;
+    INT count;
+
+    if (type == TYPE_MTA || type == TYPE_GTASA)
+    {
+        GetProcessImageName(processID, &processName);
+
+        if (source == SOURCE_AUTO)
+        {
+            sourceString = &SourceAutoString;
+        }
+        else if (source == SOURCE_MANUAL)
+        {
+            sourceString = &SourceManualString;
+        }
+        else if (source == SOURCE_CHECK)
+        {
+            sourceString = &SourceCheckString;
+        }
+        else if (source == SOURCE_CREATEPROC)
+        {
+            sourceString = &SourceCreateProcString;
+        }
+        else
+        {
+            sourceString = &SourceUnknownString;
+        }
+
+        if (type == TYPE_GTASA)
+        {
+            typeString = &ProtectedString;
+        }
+        else
+        {
+            typeString = &LauncherString;
+        }
+
+        count = TypeMap_TypeCount(type) + deltaCount;
+
+        LogMessage("%sMapping (%wZ) for %wZ (Total after:%d) - %d(%wZ)", operation, sourceString, typeString, count, processID, processName);
+    }
+}
+
+void RemoveProcess(HANDLE processID, OperationSource source)
+{
+    ProcessType type;
+
+    LogMessage("[UnFairplay] Removing processID = %d, source = %d\r\n", processID, source);
+
+    if (TypeMap_HasProcess(processID))
+    {
+        type = TypeMap_GetProcessType(processID);
+        TypeMap_LogOperation("Remove", processID, type, source, -1);
+        TypeMap_RemoveEntry(processID);
+    }
+}
+
+void AddProcess(HANDLE processID, ProcessType type, OperationSource source)
+{
+    ProcessType cachedType;
+    
+    cachedType = TypeMap_GetProcessType(processID);
+
+    LogMessage("[UnFairplay] Adding processID = %d, type = %d, source = %d, cachedType = %d\r\n", processID, type, source, cachedType);
+
+    if (cachedType != type)
+    {
+        TypeMap_LogOperation("Add", processID, type, source, 1);
+        TypeMap_AddEntry(processID, type);
+    }
+
+    if ((type == TYPE_GTASA && source == SOURCE_MANUAL)
+        || (type == TYPE_MTA && TypeMap_TypeCount(TYPE_GTASA) > 0))
+    {
+        TypeMap_SetManualByType(TYPE_GTASA, 1);
     }
 }

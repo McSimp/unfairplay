@@ -1,4 +1,7 @@
 #include "DriverMain.h"
+#include <Ntstrsafe.h>
+#include "Util.h"
+#include "ProcessTracker.h"
 
 #define IOCTL_FAIRPLAY_CONTROL_CODE          \
         CTL_CODE(FILE_DEVICE_UNKNOWN,        \
@@ -59,9 +62,13 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 
     // Fairplay uses buffered IO
     pDeviceObject->Flags |= DO_BUFFERED_IO;
-    pDeviceObject->Flags &= (~DO_DEVICE_INITIALIZING);
+    pDeviceObject->AlignmentRequirement = TRUE;
 
     IoCreateSymbolicLink(&deviceName, &dosDeviceName);
+
+    pDeviceObject->Flags &= (~DO_DEVICE_INITIALIZING);
+
+    SetNotifyRoutines(pDriverObject);
 
     return STATUS_SUCCESS;
 }
@@ -71,6 +78,8 @@ VOID DriverUnload(PDRIVER_OBJECT pDriverObject)
 	UNICODE_STRING dosDeviceName;
 
 	LogMessage("[UnFairplay] Shutting down driver\r\n");
+
+    RemoveNotifyRoutines(pDriverObject);
 
     RtlUnicodeStringInit(&dosDeviceName, L"\\DosDevices\\FairplayKD0");
 	IoDeleteSymbolicLink(&dosDeviceName);
