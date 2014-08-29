@@ -47,7 +47,6 @@ VOID CreateProcessNotify(HANDLE ParentId, HANDLE ProcessId, BOOLEAN Create)
         type = TypeMap_GetProcessType(ProcessId);
         if (type == TYPE_NOT_FOUND)
         {
-            LogMessage("[UnFairplay] New process not found\n");
             type = ClassifyProcess(ProcessId);
             if (type != TYPE_UNKNOWN)
             {
@@ -66,8 +65,6 @@ BOOLEAN CompareProcess(PUNICODE_STRING pProcessName, PCUNICODE_STRING pCompareNa
     UNICODE_STRING newProcessName;
     UNICODE_STRING newCompareName;
 
-    LogMessage("[UnFairplay] Input strings: %wZ and %wZ\n", pProcessName, pCompareName);
-    
     // Only compare the last pCompareName->Length characters of pProcessName
     if (pCompareName->Length <= pProcessName->Length)
     {
@@ -78,8 +75,6 @@ BOOLEAN CompareProcess(PUNICODE_STRING pProcessName, PCUNICODE_STRING pCompareNa
         newProcessName.Buffer = pProcessName->Buffer + ((pProcessName->Length - pCompareName->Length) / 2);
         newProcessName.Length = pCompareName->Length;
         newProcessName.MaximumLength = pCompareName->Length;
-
-        LogMessage("[UnFairplay] Comparing %wZ (%d, %d) with %wZ (%d, %d)\n", &newProcessName, newProcessName.Length, newProcessName.MaximumLength, &newCompareName, newCompareName.Length, newCompareName.MaximumLength);
 
         return RtlCompareUnicodeString(&newProcessName, &newCompareName, TRUE) == 0;
     }
@@ -107,8 +102,6 @@ ProcessType ClassifyProcess(HANDLE ProcessId)
     DECLARE_UNICODE_STRING_SIZE(processName, 600);
 
     GetProcessImageName(ProcessId, &processName);
-
-    DbgPrintEx(DPFLTR_IHVDRIVER_ID, DPFLTR_ERROR_LEVEL, "[UnFairplay] %d %d Process name = %wZ, classifying\n", processName.Length, processName.MaximumLength, &processName);
 
     if (CompareProcess(&processName, &GTASAProcess)
         || CompareProcess(&processName, &ProxySAProccess))

@@ -16,8 +16,6 @@ QUERY_INFO_PROCESS GetZwQueryInformationProcess()
     RtlInitUnicodeString(&routineName, L"ZwQueryInformationProcess");
     ZwQueryInformationProcess = (QUERY_INFO_PROCESS)MmGetSystemRoutineAddress(&routineName);
     
-    LogMessage("[UnFairplay] ZwQueryInformationProcess = 0x%X\r\n", GetZwQueryInformationProcess);
-
     return ZwQueryInformationProcess;
 }
 
@@ -63,8 +61,6 @@ HANDLE GetUniqueProcessID(HANDLE processHandle)
         LogMessage("[UnFairplay] GetUniqueProcessID failed (0x%X)\r\n", status);
         return INVALID_HANDLE_VALUE;
     }
-
-    LogMessage("[UnFairplay] UniqueProcessId = %d\r\n", pbi.UniqueProcessId);
 
     return (HANDLE)pbi.UniqueProcessId;
 }
@@ -116,9 +112,7 @@ NTSTATUS GetProcessImageName(HANDLE processID, PUNICODE_STRING processImageName)
 
     if (uniqueProcID == processID)
     {
-        LogMessage("[UnFairplay] uniqueProcID == processID (%d, %d)\r\n", uniqueProcID, processID);
         status = QueryProcessImageFileName(processHandle, processImageName);
-        LogMessage("[UnFairplay] QueryProcessImageFileName status = 0x%X\r\n", status);
         ZwClose(processHandle);
         return status;
     }
