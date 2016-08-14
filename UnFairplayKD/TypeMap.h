@@ -32,6 +32,11 @@ typedef struct {
 } TypeMapEntry;
 
 typedef struct {
+    HANDLE ProcessID;
+    BOOLEAN IsManual;
+} NoTypeEntry;
+
+typedef struct {
     TypeMapEntry Entries[TYPEMAP_MAX_SIZE];
     INT Count;
     BOOLEAN OverflowReported;
@@ -40,6 +45,7 @@ typedef struct {
 void TypeMap_RemoveEntry(HANDLE processID); // NOPE
 void TypeMap_AddEntry(HANDLE processID, ProcessType type); // NOPE
 TypeMapEntry* TypeMap_GetProcessEntry(HANDLE processID); // NOPE
+NoTypeEntry TypeMap_GetNoTypeEntry(ProcessType type, INT num);
 ProcessType TypeMap_GetProcessType(HANDLE processID); 
 BOOLEAN TypeMap_HasProcess(HANDLE processID); // NOPE
 INT TypeMap_TypeCount(ProcessType type);

@@ -2,6 +2,7 @@
 #include <Ntstrsafe.h>
 #include "Util.h"
 #include "ProcessTracker.h"
+#include "Commands.h"
 
 #define IOCTL_FAIRPLAY_CONTROL_CODE          \
         CTL_CODE(FILE_DEVICE_UNKNOWN,        \
@@ -10,8 +11,8 @@
                  FILE_READ_DATA | FILE_WRITE_DATA)
 
 #ifdef ALLOC_PRAGMA
-//#pragma alloc_text(INIT, DriverEntry)
-//#pragma alloc_text(PAGE, DriverUnload)
+#pragma alloc_text(INIT, DriverEntry)
+#pragma alloc_text(PAGE, DriverUnload)
 #endif
 
 NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath)
@@ -34,7 +35,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
 		0, 
 		&deviceName,
 		FILE_DEVICE_UNKNOWN,
-        FILE_DEVICE_SECURE_OPEN, // Note: Actual Fairplay driver uses 0 here
+        0, // Note: Actual Fairplay driver uses 0 here
 		FALSE, 
 		&pDeviceObject);
 
@@ -64,7 +65,7 @@ NTSTATUS DriverEntry(PDRIVER_OBJECT pDriverObject, PUNICODE_STRING pRegistryPath
     pDeviceObject->Flags |= DO_BUFFERED_IO;
     pDeviceObject->AlignmentRequirement = TRUE;
 
-    IoCreateSymbolicLink(&deviceName, &dosDeviceName);
+    IoCreateSymbolicLink(&dosDeviceName, &deviceName);
 
     pDeviceObject->Flags &= (~DO_DEVICE_INITIALIZING);
 
@@ -94,7 +95,7 @@ NTSTATUS IRPUnsupported(PDEVICE_OBJECT pDeviceObject, PIRP pIrp)
 
 	pIrp->IoStatus.Information = 0;
 	pIrp->IoStatus.Status = STATUS_NOT_SUPPORTED;
-	IofCompleteRequest(pIrp, IO_NO_INCREMENT);
+	IoCompleteRequest(pIrp, IO_NO_INCREMENT);
 
 	return pIrp->IoStatus.Status;
 }
@@ -107,7 +108,7 @@ NTSTATUS IRPIgnore(PDEVICE_OBJECT pDeviceObject, PIRP pIrp)
 
 	pIrp->IoStatus.Information = 0;
 	pIrp->IoStatus.Status = STATUS_SUCCESS;
-	IofCompleteRequest(pIrp, IO_NO_INCREMENT);
+	IoCompleteRequest(pIrp, IO_NO_INCREMENT);
 	return pIrp->IoStatus.Status;
 }
 
@@ -134,24 +135,22 @@ NTSTATUS IRPControl(PDEVICE_OBJECT pDeviceObject, PIRP pIrp)
 		);
     }
 
+    LogMessage("[UnFairplay] dw = %d, stat = 0x%X\r\n", dataWritten, NtStatus);
+
     pIrp->IoStatus.Status = NtStatus;
-    pIrp->IoStatus.Information = dataWritten;
+    pIrp->IoStatus.Information = 100;
 
     IoCompleteRequest(pIrp, IO_NO_INCREMENT);
 
     return NtStatus;
 }
 
-NTSTATUS CommandHandler(PCHAR pInBuffer, ULONG inBufferLength, PCHAR pOutBuffer, ULONG outBufferLength, ULONG* pDataWritten)
+NTSTATUS CommandHandler(PCHAR pInBuffer, ULONG InBufferLength, PCHAR pOutBuffer, ULONG OutBufferLength, ULONG* pDataWritten)
 {
-    UNREFERENCED_PARAMETER(inBufferLength);
-    UNREFERENCED_PARAMETER(outBufferLength);
-    UNREFERENCED_PARAMETER(pDataWritten);
-
 	if(!pInBuffer || !pOutBuffer)
 		return STATUS_UNSUCCESSFUL;
 
 	LogMessage("[UnFairplay] CommandHandler called\r\n");
 
-	return STATUS_SUCCESS;
+    return CommandRouter(pInBuffer, InBufferLength, pOutBuffer, OutBufferLength, pDataWritten);
 }

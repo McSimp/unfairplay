@@ -69,6 +69,32 @@ TypeMapEntry* TypeMap_GetProcessEntry(HANDLE processID)
     return NULL;
 }
 
+NoTypeEntry TypeMap_GetNoTypeEntry(ProcessType type, INT num)
+{
+    INT i;
+    NoTypeEntry result;
+
+    result.ProcessID = 0;
+    result.IsManual = 0;
+
+    for (i = 0; i < g_TypeMap.Count; i++)
+    {
+        TypeMapEntry* current = &g_TypeMap.Entries[i];
+
+        if (current->Type == type)
+        {
+            num--;
+            if (num == 0)
+            {
+                result.ProcessID = current->ProcessID;
+                result.IsManual = current->IsManual;
+            }
+        }
+    }
+
+    return result;
+}
+
 ProcessType TypeMap_GetProcessType(HANDLE processID)
 {
     TypeMapEntry* entry = TypeMap_GetProcessEntry(processID);
@@ -182,7 +208,7 @@ void TypeMap_LogOperation(const char* operation, HANDLE processID, ProcessType t
 
         count = TypeMap_TypeCount(type) + deltaCount;
 
-        LogMessage("%sMapping (%wZ) for %wZ (Total after:%d) - %d(%wZ)", operation, sourceString, typeString, count, processID, processName);
+        LogMessage("[UnFairplay] %sMapping (%wZ) for %wZ (Total after:%d) - %d(%wZ)\r\n", operation, sourceString, typeString, count, processID, &processName);
     }
 }
 

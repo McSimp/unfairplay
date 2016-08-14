@@ -10,6 +10,6 @@ NTSTATUS IRPUnsupported(PDEVICE_OBJECT pDeviceObject, PIRP pIrp);
 NTSTATUS IRPIgnore(PDEVICE_OBJECT pDeviceObject, PIRP pIrp);
 NTSTATUS IRPControl(PDEVICE_OBJECT pDeviceObject, PIRP pIrp);
 
-NTSTATUS CommandHandler(PCHAR pInBuffer, ULONG inBufferLength, PCHAR pOutBuffer, ULONG outBufferLength, ULONG* pDataWritten);
+NTSTATUS CommandHandler(PCHAR pInBuffer, ULONG InBufferLength, PCHAR pOutBuffer, ULONG OutBufferLength, ULONG* pDataWritten);
 
 #endif

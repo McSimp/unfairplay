@@ -157,14 +157,18 @@
     <FilesToPackage Include="@(Inf->'%(CopyOutput)')" Condition="'@(Inf)'!=''" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Commands.c" />
     <ClCompile Include="DriverMain.c" />
     <ClCompile Include="ProcessTracker.c" />
     <ClCompile Include="TypeMap.c" />
     <ClCompile Include="Util.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Commands.h" />
     <ClInclude Include="DriverMain.h" />
+    <ClInclude Include="FairplayConst.h" />
     <ClInclude Include="ProcessTracker.h" />
+    <ClInclude Include="FairplayState.h" />
     <ClInclude Include="TypeMap.h" />
     <ClInclude Include="Util.h" />
   </ItemGroup>

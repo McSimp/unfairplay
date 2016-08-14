@@ -1,6 +1,11 @@
 #include "ProcessTracker.h"
 #include "Util.h"
 
+/*
+@version Win7x86Latest
+@addr 0x12BDE
+@match no
+*/
 VOID SetNotifyRoutines(PDRIVER_OBJECT pDriverObject)
 {
     UNREFERENCED_PARAMETER(pDriverObject);
@@ -11,6 +16,11 @@ VOID SetNotifyRoutines(PDRIVER_OBJECT pDriverObject)
     // TODO: ObRegisterCallbacks
 }
 
+/*
+@version Win7x86Latest
+@addr 0x12C06
+@match no
+*/
 VOID RemoveNotifyRoutines(PDRIVER_OBJECT pDriverObject)
 {
     UNREFERENCED_PARAMETER(pDriverObject);
@@ -21,6 +31,11 @@ VOID RemoveNotifyRoutines(PDRIVER_OBJECT pDriverObject)
     // TODO: ObRegisterCallbacks
 }
 
+/*
+@version Win7x86Latest
+@addr 0x1275A
+@match yes
+*/
 VOID CreateProcessNotify(HANDLE ParentId, HANDLE ProcessId, BOOLEAN Create)
 {
     DECLARE_UNICODE_STRING_SIZE(parentName, 600);
